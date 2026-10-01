@@ -4,20 +4,34 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:le_comigo/core/idioma.dart';
 import 'package:le_comigo/core/normalizacao.dart';
 import 'package:le_comigo/data/biblioteca.dart';
 
-/// Vocabulário do modelo Vosk, lido da tabela de símbolos embutida no Gr.fst.
+/// Caminho do Gr.fst dentro de cada zip (o pt usa o layout antigo, sem graph/).
+const _grFst = {
+  Idioma.pt: 'vosk-model-small-pt-0.3/Gr.fst',
+  Idioma.en: 'vosk-model-small-en-us-0.15/graph/Gr.fst',
+  Idioma.es: 'vosk-model-small-es-0.42/graph/Gr.fst',
+};
+
+// Palavras que provam que o leitor achou a tabela certa de cada modelo.
+const _tipicas = {
+  Idioma.pt: ['gato', 'você'],
+  Idioma.en: ['cat', "don't"],
+  Idioma.es: ['gato', 'está'],
+};
+
+/// Vocabulário do modelo Vosk do [idioma], lido da tabela de símbolos
+/// embutida no Gr.fst.
 ///
 /// Formato (SymbolTable do OpenFst, little-endian), logo depois do nome
 /// ".../words.txt": int64 próxima chave, int64 tamanho e, para cada símbolo,
 /// int32 tamanho + bytes UTF-8 + int64 chave.
-Set<String> lerVocabularioVosk() {
-  final zip = ZipDecoder().decodeBytes(
-    File('assets/models/vosk-model-small-pt-0.3.zip').readAsBytesSync(),
-  );
+Set<String> lerVocabularioVosk(Idioma idioma) {
+  final zip = ZipDecoder().decodeBytes(File(idioma.modelo).readAsBytesSync());
   final fst = Uint8List.fromList(
-    zip.findFile('vosk-model-small-pt-0.3/Gr.fst')!.content as List<int>,
+    zip.findFile(_grFst[idioma]!)!.content as List<int>,
   );
   final marca = utf8.encode('words.txt');
   final dados = ByteData.sublistView(fst);
@@ -54,40 +68,55 @@ const _faixas = {
 };
 
 void main() {
-  group('vocabulário do Vosk', () {
-    late Set<String> vocabulario;
-    setUpAll(() => vocabulario = lerVocabularioVosk());
+  for (final idioma in Idioma.values) {
+    group('vocabulário do Vosk (${idioma.codigo})', () {
+      late Set<String> vocabulario;
+      setUpAll(() => vocabulario = lerVocabularioVosk(idioma));
 
-    test('a leitura do modelo traz o vocabulário inteiro', () {
-      expect(vocabulario.length, greaterThan(90000));
-      expect(vocabulario, containsAll(['gato', 'você', '[unk]']));
+      test('a leitura do modelo traz o vocabulário inteiro', () {
+        expect(vocabulario.length, greaterThan(90000));
+        expect(vocabulario, containsAll(['[unk]', ..._tipicas[idioma]!]));
+      });
+
+      test('toda palavra de todo texto existe no modelo', () {
+        final faltando = [
+          for (final t in biblioteca.where((t) => t.idioma == idioma))
+            for (final p in palavrasDaGramatica(t.conteudo))
+              if (!vocabulario.contains(p)) '${t.id}: $p',
+        ];
+        expect(faltando, isEmpty);
+      });
     });
+  }
 
-    test('toda palavra de todo texto existe no modelo', () {
-      final faltando = [
-        for (final t in biblioteca)
-          for (final p in palavrasDaGramatica(t.conteudo))
-            if (!vocabulario.contains(p)) '${t.id}: $p',
-      ];
-      expect(faltando, isEmpty);
-    });
-  });
-
-  test('ids únicos', () {
+  test('ids únicos no conjunto todo', () {
     final ids = biblioteca.map((t) => t.id).toList();
     expect(ids.toSet().length, ids.length);
   });
 
-  test('3 textos por ano, do 1º ao 5º', () {
-    expect(biblioteca.length, 15);
-    for (var ano = 1; ano <= 5; ano++) {
-      expect(textosDoAno(ano).length, 3, reason: '$anoº ano');
-      expect(textosDoAno(ano).every((t) => t.ano == ano), isTrue);
+  test('ids novos levam o prefixo do idioma; os de pt não mudam', () {
+    for (final t in biblioteca) {
+      if (t.idioma == Idioma.pt) {
+        expect(t.id, matches(RegExp(r'^[1-5]-')), reason: t.id);
+      } else {
+        expect(t.id, startsWith('${t.idioma.codigo}-${t.ano}-'), reason: t.id);
+      }
     }
   });
 
-  test('o gato curioso continua no 1º ano', () {
-    expect(textosDoAno(1).first.id, '1-gato-curioso');
+  test('3 textos por ano, do 1º ao 5º, em cada idioma', () {
+    expect(biblioteca.length, 45);
+    for (final idioma in Idioma.values) {
+      for (var ano = 1; ano <= 5; ano++) {
+        final textos = textosDoAno(idioma, ano);
+        expect(textos.length, 3, reason: '${idioma.codigo} $anoº ano');
+        expect(textos.every((t) => t.ano == ano && t.idioma == idioma), isTrue);
+      }
+    }
+  });
+
+  test('o gato curioso continua no 1º ano em português', () {
+    expect(textosDoAno(Idioma.pt, 1).first.id, '1-gato-curioso');
   });
 
   test('tamanho de cada texto dentro da faixa do ano', () {
@@ -117,5 +146,14 @@ void main() {
       ];
       expect(porTrecho, tokenizar(t.conteudo), reason: t.id);
     }
+  });
+
+  test('apóstrofo tipográfico não desalinha os trechos', () {
+    const conteudo = 'Lia’s cat doesn’t sleep.';
+    final porTrecho = [
+      for (final trecho in conteudo.split(RegExp(r'\s+'))) ...tokenizar(trecho),
+    ];
+    expect(porTrecho, tokenizar(conteudo));
+    expect(porTrecho, ["lia's", 'cat', "doesn't", 'sleep']);
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/idioma_controller.dart';
 import '../../services/vosk_service.dart';
 import '../../tema/tema_app.dart';
 import 'widgets/carregamento.dart';
@@ -9,8 +10,9 @@ import 'widgets/ilustracao_animada.dart';
 import 'widgets/titulo_animado.dart';
 
 /// Tela de abertura: anima a ilustração enquanto o modelo de voz é
-/// preparado (na primeira vez, o zip de ~31 MB é descompactado).
-/// Quando termina, troca para [proximaTela].
+/// preparado (na primeira vez de cada idioma, o zip do modelo é descompactado).
+/// Quando termina, troca para [proximaTela], mesmo se o modelo falhar: lá o
+/// "Entrar" tenta de novo e dá para escolher outro idioma.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.proximaTela});
 
@@ -44,8 +46,6 @@ class _SplashScreenState extends State<SplashScreen>
   /// sozinha e só completa quando o modelo está pronto.
   late final _progresso = AnimationController(vsync: this);
 
-  bool _falhou = false;
-
   Animation<double> _trecho(double inicio, double fim, Curve curva) =>
       CurvedAnimation(
         parent: _entrada,
@@ -78,23 +78,20 @@ class _SplashScreenState extends State<SplashScreen>
     final esperaMinima = Future.delayed(_tempoMinimo);
 
     try {
-      await context.read<VoskService>().carregarModelo();
-      await esperaMinima;
-      await _progresso.animateTo(
-        1,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOut,
-      );
-      if (mounted) _irParaProximaTela();
+      final idioma = context.read<IdiomaController>().atual;
+      await context.read<VoskService>().carregarModelo(idioma);
     } catch (_) {
-      _progresso.stop();
-      if (mounted) setState(() => _falhou = true);
+      // Segue mesmo assim: se a splash parasse aqui, um idioma salvo cujo
+      // modelo não carrega prenderia o app, sem chegar à troca de idioma.
     }
-  }
-
-  void _tentarDeNovo() {
-    setState(() => _falhou = false);
-    _carregar();
+    await esperaMinima;
+    if (!mounted) return;
+    await _progresso.animateTo(
+      1,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+    );
+    if (mounted) _irParaProximaTela();
   }
 
   void _irParaProximaTela() {
@@ -147,12 +144,10 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 36),
                     _Entrada(
                       valor: _entradaRodape.value,
-                      child: _falhou
-                          ? ErroCarregamento(aoTentarDeNovo: _tentarDeNovo)
-                          : BarraCarregamento(
-                              progresso: _progresso,
-                              t: _loop.value,
-                            ),
+                      child: BarraCarregamento(
+                        progresso: _progresso,
+                        t: _loop.value,
+                      ),
                     ),
                   ],
                 ),

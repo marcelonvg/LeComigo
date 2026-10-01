@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../tema/tema_app.dart';
-import '../../../widgets/botao_3d.dart';
+import '../../../l10n/app_localizations.dart';
 
 final _estiloRodape = Estilos.corpo.copyWith(
   fontSize: 20,
@@ -25,6 +25,7 @@ class BarraCarregamento extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textos = AppLocalizations.of(context);
     final largura = math.min(320.0, MediaQuery.sizeOf(context).width * 0.7);
     final raio = BorderRadius.circular(7);
     return Column(
@@ -51,42 +52,13 @@ class BarraCarregamento extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Carregando', style: _estiloRodape),
+            Text(textos.splashCarregando, style: _estiloRodape),
             for (var i = 0; i < 3; i++)
               Opacity(
                 opacity: ((t * 3 - i * 0.2) % 1.0) < 0.5 ? 1.0 : 0.25,
                 child: Text('.', style: _estiloRodape),
               ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Mensagem quando o modelo de voz não carrega, com "Tentar de novo".
-class ErroCarregamento extends StatelessWidget {
-  const ErroCarregamento({super.key, required this.aoTentarDeNovo});
-
-  final VoidCallback aoTentarDeNovo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          'Não foi possível preparar o reconhecimento de voz.',
-          textAlign: TextAlign.center,
-          style: _estiloRodape,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: 280,
-          child: Botao3D(
-            rotulo: 'Tentar de novo',
-            icone: Icons.refresh_rounded,
-            aoTocar: aoTentarDeNovo,
-          ),
         ),
       ],
     );

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../services/sons.dart';
 import '../../../tema/tema_app.dart';
 import '../../../widgets/botao_3d.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Painel que sobe no fim da leitura: teal se ouviu a criança,
 /// amarelo convidando a tentar de novo se não ouviu nada.
@@ -26,10 +27,10 @@ class PainelFim extends StatefulWidget {
   final VoidCallback aoLerDeNovo;
   final VoidCallback aoVerDetalhes;
 
-  static String frase(int estrelas) => switch (estrelas) {
-    3 => 'Leitura incrível! Você é fera!',
-    2 => 'Muito bem! Continue praticando.',
-    _ => 'Boa! Vamos ler mais vezes?',
+  static String frase(AppLocalizations t, int estrelas) => switch (estrelas) {
+    3 => t.fraseTresEstrelas,
+    2 => t.fraseDuasEstrelas,
+    _ => t.fraseUmaEstrela,
   };
 
   @override
@@ -46,6 +47,7 @@ class _PainelFimState extends State<PainelFim> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final ouviu = widget.ouviu;
     final corTexto = ouviu ? Cores.tealSombra : Cores.amareloEscuro;
 
@@ -82,7 +84,7 @@ class _PainelFimState extends State<PainelFim> {
                 // Flexible: com fonte grande do sistema, quebra a linha.
                 Flexible(
                   child: Text(
-                    ouviu ? 'Leitura concluída!' : 'Não consegui ouvir',
+                    ouviu ? t.leituraConcluida : t.naoConseguiOuvir,
                     style: Estilos.titulo.copyWith(color: corTexto),
                   ),
                 ),
@@ -94,15 +96,13 @@ class _PainelFimState extends State<PainelFim> {
               const SizedBox(height: 8),
             ],
             Text(
-              ouviu
-                  ? PainelFim.frase(widget.estrelas)
-                  : 'Vamos tentar de novo? Fale perto do aparelho.',
+              ouviu ? PainelFim.frase(t, widget.estrelas) : t.tenteDeNovoPerto,
               style: Estilos.corpo.copyWith(color: corTexto),
             ),
             const SizedBox(height: 16),
             ouviu
                 ? Botao3D(
-                    rotulo: 'Ler de novo',
+                    rotulo: t.lerDeNovo,
                     icone: Icons.refresh_rounded,
                     cor: Cores.teal,
                     corSombra: Cores.tealSombra,
@@ -110,7 +110,7 @@ class _PainelFimState extends State<PainelFim> {
                     aoTocar: widget.aoLerDeNovo,
                   )
                 : Botao3D(
-                    rotulo: 'Ler de novo',
+                    rotulo: t.lerDeNovo,
                     icone: Icons.refresh_rounded,
                     aoTocar: widget.aoLerDeNovo,
                   ),
@@ -120,7 +120,7 @@ class _PainelFimState extends State<PainelFim> {
                   onPressed: widget.aoVerDetalhes,
                   icon: const Icon(Icons.insights_rounded, size: 20),
                   label: Text(
-                    'Ver detalhes',
+                    t.verDetalhes,
                     style: Estilos.pequeno.comPeso(600),
                   ),
                   style: TextButton.styleFrom(foregroundColor: corTexto),
@@ -141,9 +141,10 @@ class _Estrelas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Semantics(
       container: true,
-      label: '$quantidade de 3 estrelas',
+      label: t.estrelas(quantidade),
       excludeSemantics: true,
       child: Row(
         children: [

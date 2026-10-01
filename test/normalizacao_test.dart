@@ -35,4 +35,33 @@ void main() {
     expect(lerResultado('{"text":""}'), isEmpty);
     expect(lerParcial('{"partial":"o ga"}'), 'o ga');
   });
+
+  test('apóstrofo dentro da palavra fica (como no modelo em inglês)', () {
+    expect(tokenizar("Don't stop, it's Lia's cat!"), [
+      "don't",
+      'stop',
+      "it's",
+      "lia's",
+      'cat',
+    ]);
+  });
+
+  test('apóstrofo tipográfico vira o apóstrofo reto', () {
+    expect(tokenizar('Don’t'), ["don't"]);
+    expect(palavrasDaGramatica('It’s'), ["it's", '[unk]']);
+  });
+
+  test('apóstrofo nas pontas ou sozinho é separador', () {
+    expect(tokenizar("'Hello' ' world'"), ['hello', 'world']);
+  });
+
+  test('espanhol: ¿ e ¡ separam; ñ perde o til só na comparação', () {
+    expect(tokenizar('¿Qué año? ¡Niño!'), ['que', 'ano', 'nino']);
+    expect(palavrasDaGramatica('¿Qué año? ¡Niño!'), [
+      'qué',
+      'año',
+      'niño',
+      '[unk]',
+    ]);
+  });
 }

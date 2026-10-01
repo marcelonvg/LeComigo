@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../services/sons.dart';
 import '../../../tema/tema_app.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// "Quem vai ler com você?": dois cartões grandes, menino e menina.
 class EscolhaPersonagem extends StatelessWidget {
@@ -18,17 +19,18 @@ class EscolhaPersonagem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
       children: [
-        const Text(
-          'Quem vai ler com você?',
+        Text(
+          t.quemVaiLer,
           textAlign: TextAlign.center,
           style: Estilos.tituloGrande,
         ),
         const SizedBox(height: 8),
         Text(
-          'Toque para escolher seu amigo de leitura',
+          t.toqueParaEscolher,
           textAlign: TextAlign.center,
           style: Estilos.corpo.copyWith(color: Cores.textoSuave),
         ),
@@ -38,7 +40,7 @@ class EscolhaPersonagem extends StatelessWidget {
             Expanded(
               child: _CartaoPersonagem(
                 imagem: 'assets/images/personagens/menino_corpo.png',
-                rotulo: 'Menino',
+                rotulo: t.menino,
                 selecionado: menina == false,
                 aoTocar: () => aoEscolher(false),
               ),
@@ -47,7 +49,7 @@ class EscolhaPersonagem extends StatelessWidget {
             Expanded(
               child: _CartaoPersonagem(
                 imagem: 'assets/images/personagens/menina_corpo.png',
-                rotulo: 'Menina',
+                rotulo: t.menina,
                 selecionado: menina == true,
                 aoTocar: () => aoEscolher(true),
               ),

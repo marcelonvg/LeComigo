@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../services/sons.dart';
 import '../../../tema/tema_app.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Contagem 3-2-1 por cima da tela. Cada número entra com um "pulo"
 /// e o aparelho dá um toque leve e um "ding".
@@ -35,13 +36,14 @@ class _ContagemRegressivaState extends State<ContagemRegressiva> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Positioned.fill(
       child: ColoredBox(
         color: Cores.fundo.withValues(alpha: 0.95),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Prepare-se!', style: Estilos.titulo.copyWith(fontSize: 26)),
+            Text(t.prepareSe, style: Estilos.titulo.copyWith(fontSize: 26)),
             const SizedBox(height: 24),
             TweenAnimationBuilder<double>(
               key: ValueKey(widget.numero), // reinicia a animação a cada número

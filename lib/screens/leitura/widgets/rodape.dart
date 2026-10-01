@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../tema/tema_app.dart';
 import 'microfone_ouvindo.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Faixa fixa no pé da tela, separada do conteúdo por uma linha.
 class Rodape extends StatelessWidget {
@@ -30,13 +31,14 @@ class AvisoOuvindo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Row(
       children: [
         const MicrofoneOuvindo(),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            parando ? 'Só um instante...' : 'Estou ouvindo!\nLeia com calma.',
+            parando ? t.soUmInstante : t.estouOuvindo,
             style: Estilos.corpo
                 .comPeso(500)
                 .copyWith(fontSize: 19, height: 1.3),

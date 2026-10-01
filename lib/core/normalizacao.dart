@@ -16,12 +16,19 @@ String removerAcentos(String texto) {
 
 /// Minúsculas, pontuação vira espaço, separa por espaços.
 /// Com [manterAcentos] = false (padrão), também remove os acentos.
+///
+/// O apóstrofo dentro da palavra fica: no modelo em inglês, "don't" é uma
+/// palavra só. Nas pontas ("'hello'") ele é só pontuação.
 List<String> tokenizar(String texto, {bool manterAcentos = false}) {
-  var t = texto.toLowerCase();
+  var t = texto.toLowerCase().replaceAll('’', "'");
   if (!manterAcentos) t = removerAcentos(t);
-  // Mantém só letras (com ou sem acento) e dígitos; o resto vira separador.
-  t = t.replaceAll(RegExp('[^a-z0-9$_comAcento]+'), ' ');
-  return t.split(' ').where((p) => p.isNotEmpty).toList();
+  // Mantém letras (com ou sem acento), dígitos e apóstrofo; o resto separa.
+  t = t.replaceAll(RegExp("[^a-z0-9'$_comAcento]+"), ' ');
+  return t
+      .split(' ')
+      .map((p) => p.replaceAll(RegExp(r"^'+|'+$"), ''))
+      .where((p) => p.isNotEmpty)
+      .toList();
 }
 
 /// Lista de palavras para a grammar do Vosk: palavras únicas do texto + "[unk]".

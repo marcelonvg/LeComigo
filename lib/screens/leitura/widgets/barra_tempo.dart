@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/formatacao.dart';
 import '../../../tema/tema_app.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Barra amarela no topo que encolhe conforme o tempo passa, com o
 /// tempo restante e o botão ⓘ dos dados do reconhecimento.
@@ -22,6 +23,7 @@ class BarraTempo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 4, 4),
       child: ValueListenableBuilder<Duration>(
@@ -42,7 +44,7 @@ class BarraTempo extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Dados do reconhecimento',
+                tooltip: t.dadosReconhecimento,
                 onPressed: aoAlternarDetalhes,
                 icon: const Icon(
                   Icons.info_outline_rounded,
