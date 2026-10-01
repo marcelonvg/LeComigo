@@ -26,12 +26,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get splashCarregando => 'Carregando';
 
   @override
-  String get splashErro => 'Não foi possível preparar o reconhecimento de voz.';
-
-  @override
-  String get tentarDeNovo => 'Tentar de novo';
-
-  @override
   String get bibliotecaTitulo => 'Escolha o texto';
 
   @override

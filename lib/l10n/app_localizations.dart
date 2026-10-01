@@ -130,18 +130,6 @@ abstract class AppLocalizations {
   /// **'Carregando'**
   String get splashCarregando;
 
-  /// No description provided for @splashErro.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível preparar o reconhecimento de voz.'**
-  String get splashErro;
-
-  /// No description provided for @tentarDeNovo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tentar de novo'**
-  String get tentarDeNovo;
-
   /// No description provided for @bibliotecaTitulo.
   ///
   /// In pt, this message translates to:

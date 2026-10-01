@@ -11,7 +11,8 @@ import 'widgets/titulo_animado.dart';
 
 /// Tela de abertura: anima a ilustração enquanto o modelo de voz é
 /// preparado (na primeira vez de cada idioma, o zip do modelo é descompactado).
-/// Quando termina, troca para [proximaTela].
+/// Quando termina, troca para [proximaTela], mesmo se o modelo falhar: lá o
+/// "Entrar" tenta de novo e dá para escolher outro idioma.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.proximaTela});
 
@@ -44,8 +45,6 @@ class _SplashScreenState extends State<SplashScreen>
   /// O carregamento não informa porcentagem: a barra avança até 90%
   /// sozinha e só completa quando o modelo está pronto.
   late final _progresso = AnimationController(vsync: this);
-
-  bool _falhou = false;
 
   Animation<double> _trecho(double inicio, double fim, Curve curva) =>
       CurvedAnimation(
@@ -81,22 +80,18 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       final idioma = context.read<IdiomaController>().atual;
       await context.read<VoskService>().carregarModelo(idioma);
-      await esperaMinima;
-      await _progresso.animateTo(
-        1,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOut,
-      );
-      if (mounted) _irParaProximaTela();
     } catch (_) {
-      _progresso.stop();
-      if (mounted) setState(() => _falhou = true);
+      // Segue mesmo assim: se a splash parasse aqui, um idioma salvo cujo
+      // modelo não carrega prenderia o app, sem chegar à troca de idioma.
     }
-  }
-
-  void _tentarDeNovo() {
-    setState(() => _falhou = false);
-    _carregar();
+    await esperaMinima;
+    if (!mounted) return;
+    await _progresso.animateTo(
+      1,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+    );
+    if (mounted) _irParaProximaTela();
   }
 
   void _irParaProximaTela() {
@@ -149,12 +144,10 @@ class _SplashScreenState extends State<SplashScreen>
                     const SizedBox(height: 36),
                     _Entrada(
                       valor: _entradaRodape.value,
-                      child: _falhou
-                          ? ErroCarregamento(aoTentarDeNovo: _tentarDeNovo)
-                          : BarraCarregamento(
-                              progresso: _progresso,
-                              t: _loop.value,
-                            ),
+                      child: BarraCarregamento(
+                        progresso: _progresso,
+                        t: _loop.value,
+                      ),
                     ),
                   ],
                 ),

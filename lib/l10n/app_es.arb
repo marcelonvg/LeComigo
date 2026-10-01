@@ -5,8 +5,6 @@
   "inicioCarregando": "Cargando...",
   "inicioErroModelo": "No se pudo preparar el reconocimiento de voz. Inténtalo de nuevo.",
   "splashCarregando": "Cargando",
-  "splashErro": "No se pudo preparar el reconocimiento de voz.",
-  "tentarDeNovo": "Intentar de nuevo",
   "bibliotecaTitulo": "Elige el texto",
   "bibliotecaSubtitulo": "Para el docente: elige y entrega el dispositivo al niño.",
   "anoNumero": "{ano}.º",

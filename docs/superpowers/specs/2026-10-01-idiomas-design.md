@@ -118,7 +118,10 @@ Comportamento:
    hoje.
 
 **Falha ao carregar o modelo:**
-- Na splash, aparece o "tentar de novo" que já existe.
+- Na splash, o app segue para a tela inicial mesmo assim. Se a splash
+  parasse num "tentar de novo", um idioma salvo cujo modelo não carrega
+  (por exemplo, sem espaço para descompactar) prenderia o app sem chegar à
+  troca de idioma.
 - Na tela inicial, a tela continua aberta com uma mensagem de erro, e
   "Entrar" pode ser tocado de novo. A pessoa também pode voltar para outro
   idioma.

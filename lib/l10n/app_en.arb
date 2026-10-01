@@ -5,8 +5,6 @@
   "inicioCarregando": "Loading...",
   "inicioErroModelo": "Could not prepare speech recognition. Please try again.",
   "splashCarregando": "Loading",
-  "splashErro": "Could not prepare speech recognition.",
-  "tentarDeNovo": "Try again",
   "bibliotecaTitulo": "Choose a text",
   "bibliotecaSubtitulo": "For the teacher: choose a text and hand the device to the child.",
   "anoNumero": "{ano, select, 1{1st} 2{2nd} 3{3rd} other{{ano}th}}",

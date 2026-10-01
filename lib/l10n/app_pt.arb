@@ -5,17 +5,33 @@
   "inicioCarregando": "Carregando...",
   "inicioErroModelo": "Não foi possível preparar o reconhecimento de voz. Tente de novo.",
   "splashCarregando": "Carregando",
-  "splashErro": "Não foi possível preparar o reconhecimento de voz.",
-  "tentarDeNovo": "Tentar de novo",
   "bibliotecaTitulo": "Escolha o texto",
   "bibliotecaSubtitulo": "Para o professor: escolha e entregue o aparelho à criança.",
   "anoNumero": "{ano}º",
-  "@anoNumero": {"placeholders": {"ano": {"type": "String"}}},
+  "@anoNumero": {
+    "placeholders": {
+      "ano": {
+        "type": "String"
+      }
+    }
+  },
   "anoPalavra": "ano",
   "anoCompleto": "{ano}º ano",
-  "@anoCompleto": {"placeholders": {"ano": {"type": "String"}}},
+  "@anoCompleto": {
+    "placeholders": {
+      "ano": {
+        "type": "String"
+      }
+    }
+  },
   "palavras": "{quantidade, plural, =1{1 palavra} other{{quantidade} palavras}}",
-  "@palavras": {"placeholders": {"quantidade": {"type": "int"}}},
+  "@palavras": {
+    "placeholders": {
+      "quantidade": {
+        "type": "int"
+      }
+    }
+  },
   "erroSemPermissao": "Preciso do microfone para ouvir a leitura. Libere a permissão nas configurações do aparelho.",
   "erroMicrofone": "Não foi possível ligar o microfone. Tente de novo.",
   "continuar": "Continuar",
@@ -43,7 +59,13 @@
   "lerDeNovo": "Ler de novo",
   "verDetalhes": "Ver detalhes",
   "estrelas": "{quantidade} de 3 estrelas",
-  "@estrelas": {"placeholders": {"quantidade": {"type": "int"}}},
+  "@estrelas": {
+    "placeholders": {
+      "quantidade": {
+        "type": "int"
+      }
+    }
+  },
   "soUmInstante": "Só um instante...",
   "estouOuvindo": "Estou ouvindo!\nLeia com calma.",
   "resultadoTitulo": "Resultado da leitura",

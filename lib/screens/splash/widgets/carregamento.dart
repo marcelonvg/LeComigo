@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../tema/tema_app.dart';
-import '../../../widgets/botao_3d.dart';
 import '../../../l10n/app_localizations.dart';
 
 final _estiloRodape = Estilos.corpo.copyWith(
@@ -60,32 +59,6 @@ class BarraCarregamento extends StatelessWidget {
                 child: Text('.', style: _estiloRodape),
               ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Mensagem quando o modelo de voz não carrega, com "Tentar de novo".
-class ErroCarregamento extends StatelessWidget {
-  const ErroCarregamento({super.key, required this.aoTentarDeNovo});
-
-  final VoidCallback aoTentarDeNovo;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    return Column(
-      children: [
-        Text(t.splashErro, textAlign: TextAlign.center, style: _estiloRodape),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: 280,
-          child: Botao3D(
-            rotulo: t.tentarDeNovo,
-            icone: Icons.refresh_rounded,
-            aoTocar: aoTentarDeNovo,
-          ),
         ),
       ],
     );

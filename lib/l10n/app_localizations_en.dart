@@ -26,12 +26,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashCarregando => 'Loading';
 
   @override
-  String get splashErro => 'Could not prepare speech recognition.';
-
-  @override
-  String get tentarDeNovo => 'Try again';
-
-  @override
   String get bibliotecaTitulo => 'Choose a text';
 
   @override
