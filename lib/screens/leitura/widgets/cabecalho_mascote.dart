@@ -4,6 +4,7 @@ import '../../../tema/tema_app.dart';
 import '../../../widgets/balao_fala.dart';
 import '../../../widgets/mascote.dart';
 import '../leitura_controller.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Mascote com o balão de fala; expressão e frase acompanham a fase.
 class CabecalhoMascote extends StatelessWidget {
@@ -24,16 +25,14 @@ class CabecalhoMascote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final (expressao, fala) = switch (fase) {
       FaseLeitura.escolha ||
-      FaseLeitura.pronto => (Expressao.alegre, 'Vamos ler juntos?'),
-      FaseLeitura.contagem => (Expressao.concentrado, 'Já vai começar!'),
-      FaseLeitura.lendo => (Expressao.falando, 'Leia em voz alta!'),
-      FaseLeitura.fim when ouviuAlgo => (
-        Expressao.joinha,
-        'Você leu muito bem!',
-      ),
-      FaseLeitura.fim => (Expressao.pensativo, 'Hum, não ouvi direito...'),
+      FaseLeitura.pronto => (Expressao.alegre, t.mascotePronto),
+      FaseLeitura.contagem => (Expressao.concentrado, t.mascoteContagem),
+      FaseLeitura.lendo => (Expressao.falando, t.mascoteLendo),
+      FaseLeitura.fim when ouviuAlgo => (Expressao.joinha, t.mascoteLeuBem),
+      FaseLeitura.fim => (Expressao.pensativo, t.mascoteNaoOuvi),
     };
 
     return Row(

@@ -5,6 +5,7 @@ import '../../core/formatacao.dart';
 import '../../core/normalizacao.dart';
 import '../../tema/tema_app.dart';
 import '../leitura/widgets/cartao_texto.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Detalhes da leitura para o professor: PCPM, precisão, tempo,
 /// contagens e o texto com cada palavra marcada pelo status.
@@ -22,11 +23,12 @@ class ResultadoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final a = avaliacao;
     final precisao = a.precisao;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Resultado da leitura', style: Estilos.destaque),
+        title: Text(t.resultadoTitulo, style: Estilos.destaque),
         backgroundColor: Cores.fundo,
         surfaceTintColor: Colors.transparent,
       ),
@@ -39,7 +41,7 @@ class ResultadoScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _CartaoValor(
-                  rotulo: 'Precisão',
+                  rotulo: t.precisao,
                   valor: precisao == null
                       ? '—'
                       : '${(precisao * 100).round()}%',
@@ -48,7 +50,7 @@ class ResultadoScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _CartaoValor(
-                  rotulo: 'Tempo',
+                  rotulo: t.tempo,
                   valor: formatarMinSeg(a.tempo),
                 ),
               ),
@@ -59,10 +61,10 @@ class ResultadoScreen extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _Contagem('Certas', a.certas, _Visual.certa.cor),
-              _Contagem('Trocadas', a.trocadas, _Visual.trocada.cor),
-              _Contagem('Puladas', a.puladas, _Visual.pulada.cor),
-              _Contagem('Acrescentadas', a.acrescentadas, Cores.textoAzulado),
+              _Contagem(t.certas, a.certas, _Visual.certa.cor),
+              _Contagem(t.trocadas, a.trocadas, _Visual.trocada.cor),
+              _Contagem(t.puladas, a.puladas, _Visual.pulada.cor),
+              _Contagem(t.acrescentadas, a.acrescentadas, Cores.textoAzulado),
             ],
           ),
           const SizedBox(height: 16),
@@ -85,6 +87,7 @@ class _CartaoPcpm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
@@ -99,7 +102,7 @@ class _CartaoPcpm extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'palavras corretas por minuto',
+            t.palavrasCorretasPorMinuto,
             style: Estilos.corpo.comPeso(600).copyWith(color: Cores.tealSombra),
           ),
         ],
@@ -168,14 +171,20 @@ class _Contagem extends StatelessWidget {
 
 /// Cor, estilo e nome de cada status no texto e na legenda.
 enum _Visual {
-  certa('certa', Cores.teal),
-  trocada('trocada', Cores.erro),
-  pulada('pulada', Cores.textoSuave),
-  naoLida('não lida', Cores.textoDesabilitado);
+  certa(Cores.teal),
+  trocada(Cores.erro),
+  pulada(Cores.textoSuave),
+  naoLida(Cores.textoDesabilitado);
 
-  const _Visual(this.nome, this.cor);
-  final String nome;
+  const _Visual(this.cor);
   final Color cor;
+
+  String nome(AppLocalizations t) => switch (this) {
+    certa => t.statusCerta,
+    trocada => t.statusTrocada,
+    pulada => t.statusPulada,
+    naoLida => t.statusNaoLida,
+  };
 
   static _Visual de(StatusPalavra s) => switch (s) {
     StatusPalavra.certa => certa,
@@ -208,6 +217,7 @@ class _TextoAvaliado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final palavras = <Widget>[];
     var indice =
         0; // posição, em palavras normalizadas (mesma conta do TextoLeitura)
@@ -224,7 +234,7 @@ class _TextoAvaliado extends StatelessWidget {
       palavras.add(
         Semantics(
           container: true,
-          label: '$trecho: ${visual.nome}',
+          label: '$trecho: ${visual.nome(t)}',
           excludeSemantics: true,
           child: Text(trecho, style: visual.estilo),
         ),
@@ -251,6 +261,7 @@ class _Legenda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return ExcludeSemantics(
       child: Wrap(
         spacing: 16,
@@ -269,7 +280,7 @@ class _Legenda extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(v.nome, style: Estilos.pequeno),
+                Text(v.nome(t), style: Estilos.pequeno),
               ],
             ),
         ],

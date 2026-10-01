@@ -9,6 +9,8 @@ import 'package:le_comigo/services/vosk_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'apoio.dart';
+
 /// Tela de celular: [largura] x [altura] pontos.
 void usarCelular(
   WidgetTester tester, {
@@ -29,13 +31,16 @@ Future<void> abrir(WidgetTester tester, {double escalaFonte = 1}) async {
         Provider<VoskService>(create: (_) => VoskService()),
         ChangeNotifierProvider<IdiomaController>.value(value: idioma),
       ],
-      child: MaterialApp(
-        builder: (context, filho) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: TextScaler.linear(escalaFonte)),
-          child: filho!,
+      child: Consumer<IdiomaController>(
+        builder: (context, c, _) => appTeste(
+          const BibliotecaScreen(),
+          locale: Locale(c.atual.codigo),
+          builder: (context, filho) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(escalaFonte)),
+            child: filho!,
+          ),
         ),
-        home: const BibliotecaScreen(),
       ),
     ),
   );
@@ -125,6 +130,30 @@ void main() {
       expect(find.text(t.titulo), findsOneWidget, reason: t.id);
     }
     expect(find.text(textosDoAno(Idioma.pt, 1).first.titulo), findsNothing);
+  });
+
+  testWidgets('cabe em celular pequeno com fonte aumentada em en e es', (
+    tester,
+  ) async {
+    usarCelular(tester, largura: 320, altura: 640);
+    await abrir(tester, escalaFonte: 1.3);
+    final idioma = Provider.of<IdiomaController>(
+      tester.element(find.byType(BibliotecaScreen)),
+      listen: false,
+    );
+    const chips = {
+      Idioma.en: ['1st', '2nd', '3rd', '4th', '5th'],
+      Idioma.es: ['1.º', '2.º', '3.º', '4.º', '5.º'],
+    };
+    for (final MapEntry(key: i, value: rotulos) in chips.entries) {
+      await idioma.escolher(i);
+      await tester.pumpAndSettle();
+      for (final rotulo in rotulos) {
+        await tester.tap(find.text(rotulo));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: '${i.codigo} $rotulo');
+      }
+    }
   });
 
   testWidgets('cabe em celular pequeno com fonte aumentada', (tester) async {

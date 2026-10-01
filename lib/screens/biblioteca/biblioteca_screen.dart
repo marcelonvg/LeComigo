@@ -8,6 +8,7 @@ import '../../services/idioma_controller.dart';
 import '../../services/sons.dart';
 import '../../tema/tema_app.dart';
 import '../leitura/leitura_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Escolha do texto, feita pelo professor antes de entregar o aparelho
 /// à criança: ano escolar no topo, textos do ano em cartões.
@@ -30,6 +31,7 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final idioma = context.watch<IdiomaController>().atual;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -38,10 +40,10 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
             children: [
-              const Text('Escolha o texto', style: Estilos.tituloGrande),
+              Text(t.bibliotecaTitulo, style: Estilos.tituloGrande),
               const SizedBox(height: 6),
               Text(
-                'Para o professor: escolha e entregue o aparelho à criança.',
+                t.bibliotecaSubtitulo,
                 style: Estilos.corpo.copyWith(color: Cores.textoSuave),
               ),
               const SizedBox(height: 24),
@@ -103,6 +105,7 @@ class _ChipAno extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final cor = selecionado ? Cores.tealSombra : Cores.texto;
     // O GestureDetector fica por fora: o excludeSemantics esconderia
     // a ação de toque dele do leitor de tela.
@@ -115,7 +118,7 @@ class _ChipAno extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: selecionado,
-        label: '$anoº ano',
+        label: t.anoCompleto('$ano'),
         excludeSemantics: true,
         child: AnimatedContainer(
           duration: _duracao,
@@ -136,8 +139,11 @@ class _ChipAno extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text('$anoº', style: Estilos.destaque.copyWith(color: cor)),
-              Text('ano', style: Estilos.pequeno.copyWith(color: cor)),
+              Text(
+                t.anoNumero('$ano'),
+                style: Estilos.destaque.copyWith(color: cor),
+              ),
+              Text(t.anoPalavra, style: Estilos.pequeno.copyWith(color: cor)),
             ],
           ),
         ),
@@ -155,6 +161,7 @@ class _CartaoBiblioteca extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final palavras = tokenizar(texto.conteudo).length;
     return Semantics(
       button: true,
@@ -196,7 +203,7 @@ class _CartaoBiblioteca extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      '$palavras palavras',
+                      t.palavras(palavras),
                       style: Estilos.pequeno
                           .comPeso(600)
                           .copyWith(color: Cores.tealSombra),

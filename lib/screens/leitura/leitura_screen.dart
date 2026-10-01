@@ -17,6 +17,7 @@ import 'widgets/painel_detalhes.dart';
 import 'widgets/painel_fim.dart';
 import 'widgets/rodape.dart';
 import 'widgets/texto_leitura.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Tela em que a criança lê o texto em voz alta.
 /// A lógica fica no [LeituraController]; aqui só se monta a tela.
@@ -130,21 +131,20 @@ class _Rodape extends StatelessWidget {
   final String titulo;
   final LeituraController c;
 
-  static String _mensagem(ErroLeitura erro) => switch (erro) {
-    ErroLeitura.semPermissao =>
-      'Preciso do microfone para ouvir a leitura. '
-          'Libere a permissão nas configurações do aparelho.',
-    ErroLeitura.falhaMicrofone =>
-      'Não foi possível ligar o microfone. Tente de novo.',
-  };
+  static String _mensagem(AppLocalizations t, ErroLeitura erro) =>
+      switch (erro) {
+        ErroLeitura.semPermissao => t.erroSemPermissao,
+        ErroLeitura.falhaMicrofone => t.erroMicrofone,
+      };
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return switch (c.fase) {
       FaseLeitura.escolha => Rodape(
         children: [
           Botao3D(
-            rotulo: 'Continuar',
+            rotulo: t.continuar,
             icone: Icons.arrow_forward_rounded,
             aoTocar: c.menina == null ? null : c.confirmarPersonagem,
           ),
@@ -154,14 +154,14 @@ class _Rodape extends StatelessWidget {
         children: [
           if (c.erro != null) ...[
             Text(
-              _mensagem(c.erro!),
+              _mensagem(t, c.erro!),
               textAlign: TextAlign.center,
               style: Estilos.corpo.copyWith(color: Cores.erro),
             ),
             const SizedBox(height: 12),
           ],
           Botao3D(
-            rotulo: 'Começar a leitura',
+            rotulo: t.comecarLeitura,
             icone: Icons.mic_rounded,
             aoTocar: c.fase == FaseLeitura.pronto ? c.comecar : null,
           ),
@@ -172,7 +172,7 @@ class _Rodape extends StatelessWidget {
           AvisoOuvindo(parando: c.parando),
           const SizedBox(height: 8),
           Botao3D.secundario(
-            rotulo: 'Terminei',
+            rotulo: t.terminei,
             icone: Icons.check_rounded,
             aoTocar: c.parando ? null : c.terminar,
           ),

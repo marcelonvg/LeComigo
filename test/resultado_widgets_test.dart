@@ -5,6 +5,8 @@ import 'package:le_comigo/core/normalizacao.dart';
 import 'package:le_comigo/screens/leitura/widgets/painel_fim.dart';
 import 'package:le_comigo/screens/resultado/resultado_screen.dart';
 
+import 'apoio.dart';
+
 const _texto = 'O gato da Lia dorme no sofá.';
 
 AvaliacaoLeitura _avaliar(String reconhecido, {int segundos = 30}) =>
@@ -14,7 +16,7 @@ AvaliacaoLeitura _avaliar(String reconhecido, {int segundos = 30}) =>
       tempo: Duration(seconds: segundos),
     );
 
-Widget _app(Widget filho) => MaterialApp(home: Scaffold(body: filho));
+Widget _app(Widget filho) => appTeste(Scaffold(body: filho));
 
 void main() {
   group('PainelFim (criança)', () {
@@ -72,8 +74,8 @@ void main() {
   group('ResultadoScreen (professor)', () {
     Future<void> abrir(WidgetTester tester, AvaliacaoLeitura a) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ResultadoScreen(
+        appTeste(
+          ResultadoScreen(
             titulo: 'O gato curioso',
             texto: _texto,
             avaliacao: a,

@@ -9,6 +9,8 @@ import 'package:le_comigo/screens/leitura/widgets/texto_leitura.dart';
 import 'package:le_comigo/services/vosk_service.dart';
 import 'package:provider/provider.dart';
 
+import 'apoio.dart';
+
 /// Tela de celular comum: 360 x 800 pontos.
 void usarCelular(WidgetTester tester) {
   tester.view.physicalSize = const Size(1080, 2400);
@@ -20,7 +22,7 @@ void usarCelular(WidgetTester tester) {
 // a leitura não começa, então ele pode ser usado sem o plugin nativo.
 Widget _app(TextoBiblioteca texto) => Provider<VoskService>(
   create: (_) => VoskService(),
-  child: MaterialApp(home: LeituraScreen(texto: texto)),
+  child: appTeste(LeituraScreen(texto: texto)),
 );
 
 void main() {
@@ -67,7 +69,7 @@ void main() {
       await tester.pumpWidget(
         Provider<VoskService>.value(
           value: vosk,
-          child: MaterialApp(home: LeituraScreen(texto: texto)),
+          child: appTeste(LeituraScreen(texto: texto)),
         ),
       );
       await tester.tap(find.text('Menina'));
