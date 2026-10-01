@@ -16,6 +16,7 @@ dependencies:
   permission_handler: ^11.4.0
   printing: ^5.14.3
   provider: ^6.1.5+1
+  shared_preferences: ^2.5.5
   sqflite: ^2.4.4
   # A versão 0.3.48 do pub.dev exige Dart < 3 e não tem namespace (quebra no AGP 8).
   # O master do GitHub corrige os dois; fixamos o commit para o build ser reproduzível.
