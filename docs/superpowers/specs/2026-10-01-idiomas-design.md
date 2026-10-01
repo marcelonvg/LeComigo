@@ -19,7 +19,7 @@ reconhecimento de voz). O app continua 100% offline.
 | Textos en/es | 15 textos originais por idioma (3 por ano), escritos pelo Claude e revisados pelo usuário |
 | Tradução das telas | `gen-l10n` do Flutter com arquivos ARB |
 | Persistência | `shared_preferences` (dependência nova) |
-| Modelos na memória | Só um por vez; trocar de idioma libera o atual e carrega o novo |
+| Modelos na memória | Cada modelo carregado fica guardado e é reaproveitado; o plugin não libera modelos no Android |
 
 Rejeitados:
 - Escolher só na 1ª abertura e trocar por um botão na biblioteca: o usuário
@@ -68,9 +68,13 @@ enum Idioma {
 
 ## Reconhecimento — `VoskService`
 
-- `carregarModelo(Idioma idioma)`: se já houver um modelo de **outro** idioma
-  carregado, cancela a sessão ativa, faz `dispose` do modelo e carrega o novo.
-  Se for o mesmo idioma, não faz nada.
+- `carregarModelo(Idioma idioma)`: torna `idioma` o modelo ativo. Se ele já
+  foi carregado antes, reaproveita; se não, carrega e guarda. Cancela a
+  sessão de reconhecimento ativa antes de trocar.
+- Os modelos ficam guardados num mapa por idioma, porque no Android o
+  `vosk_flutter` mantém o modelo no lado Java e não expõe como liberá-lo
+  (`Model.dispose()` só age em desktop). Assim cada idioma ocupa memória uma
+  vez só, e voltar para um idioma já usado é instantâneo.
 - Expõe `Idioma? idiomaCarregado`.
 - A primeira carga de cada idioma descompacta o zip, o que leva alguns
   segundos. As cargas seguintes usam a pasta já extraída. Isso já é feito
@@ -88,8 +92,9 @@ splash (carrega o modelo do idioma atual) → tela inicial → biblioteca
 ```
 
 **Splash:** igual a hoje, mas carrega o modelo do idioma atual e, no fim, vai
-para a `InicioScreen` em vez da biblioteca. Ela não mostra texto traduzível
-(o título "Lê Comigo" é nome de marca e fica igual nos 3 idiomas).
+para a `InicioScreen` em vez da biblioteca. O idioma é lido antes do
+`runApp`, então "Carregando" e a mensagem de erro já aparecem no idioma
+atual. O título "Lê Comigo" é nome de marca e fica igual nos 3 idiomas.
 
 **`InicioScreen` (nova, `lib/screens/inicio/`):** aparece em toda abertura.
 - Mascote e título "Lê Comigo".
@@ -162,10 +167,9 @@ idioma.
 | | pt | en | es |
 |---|---|---|---|
 | Ano escolar | 1º ano | 1st grade | 1.º grado |
-| Métrica | PCPM | WCPM | PCPM |
+| Métrica | palavras corretas por minuto | words correct per minute | palabras correctas por minuto |
 
 - Os sons (`assets/sons/`) são efeitos sem fala e ficam como estão.
-- O PDF do resultado, se tiver frases, também usa `AppLocalizations`.
 
 ## Testes
 
