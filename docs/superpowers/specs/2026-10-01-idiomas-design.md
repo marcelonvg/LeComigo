@@ -4,17 +4,17 @@ Data: 2026-10-01 · Status: aprovado em conversa, aguardando revisão desta spec
 
 ## Objetivo
 
-O app passa a funcionar em português, inglês e espanhol. Na primeira abertura
-a pessoa escolhe o idioma; a escolha vale para as telas **e** para a leitura
-(textos e reconhecimento de voz). Dá para trocar depois. O app continua 100%
-offline.
+O app passa a funcionar em português, inglês e espanhol. Toda vez que o app
+abre, uma tela inicial mostra o idioma atual e deixa trocá-lo antes de
+entrar. A escolha vale para as telas **e** para a leitura (textos e
+reconhecimento de voz). O app continua 100% offline.
 
 ## Decisões
 
 | Tema | Decisão |
 |---|---|
 | Modelos de voz | Os 3 modelos Vosk vão no APK (~110 MB no total) |
-| Quando escolher | Na 1ª abertura; trocar depois por um botão na biblioteca |
+| Quando escolher | Em toda abertura, numa tela inicial com as 3 bandeiras (a salva já marcada) e o botão "Entrar" |
 | Escopo da escolha | Uma escolha só: idioma das telas = idioma da leitura |
 | Textos en/es | 15 textos originais por idioma (3 por ano), escritos pelo Claude e revisados pelo usuário |
 | Tradução das telas | `gen-l10n` do Flutter com arquivos ARB |
@@ -22,6 +22,13 @@ offline.
 | Modelos na memória | Só um por vez; trocar de idioma libera o atual e carrega o novo |
 
 Rejeitados:
+- Escolher só na 1ª abertura e trocar por um botão na biblioteca: o usuário
+  quer a opção visível antes de entrar.
+- Bandeiras na própria splash: a janela para trocar seria curta, porque a
+  splash entra sozinha quando o modelo termina de carregar.
+- Botão de idioma também na biblioteca: fica de fora por enquanto, porque a
+  troca já acontece na tela inicial. Pode entrar depois, reusando o mesmo
+  seletor.
 - Baixar o modelo sob demanda, porque quebraria o "offline desde a instalação".
 - Um APK por idioma, porque a escolha não seria feita dentro do app.
 - Mapa de strings feito à mão, porque não traduz os textos do Material e não
@@ -49,9 +56,12 @@ enum Idioma {
 
 `ChangeNotifier` fornecido por Provider em `main.dart`, ao lado do `VoskService`.
 
-- `Idioma? atual`: null até haver uma escolha.
+- `Idioma atual`: o idioma salvo. Sem nada salvo (1ª abertura), usa o idioma
+  do aparelho se for pt, en ou es; senão, pt.
 - `Future<void> carregar()`: lê o código salvo em `shared_preferences`.
-- `Future<void> escolher(Idioma)`: salva e notifica.
+- `Future<void> escolher(Idioma)`: salva e notifica. Como o `MaterialApp`
+  escuta o controller, a tela inicial muda de idioma na hora em que a pessoa
+  toca numa bandeira.
 
 `MaterialApp` escuta o controller para definir `locale`,
 `supportedLocales`, `localizationsDelegates` e `AppLocalizations.delegate`.
@@ -73,35 +83,40 @@ precisa.
 
 ## Fluxo de telas
 
-**Primeira abertura (nenhum idioma salvo):** a splash anima e lê o
-controller. Sem idioma, ela vai para `EscolhaIdiomaScreen`. Depois da
-escolha, volta ao estado de carregamento da splash, carrega o modelo e vai
-para a biblioteca. A splash não mostra texto traduzível antes da escolha
+```
+splash (carrega o modelo do idioma atual) → tela inicial → biblioteca
+```
+
+**Splash:** igual a hoje, mas carrega o modelo do idioma atual e, no fim, vai
+para a `InicioScreen` em vez da biblioteca. Ela não mostra texto traduzível
 (o título "Lê Comigo" é nome de marca e fica igual nos 3 idiomas).
 
-**Aberturas seguintes:** a splash carrega o modelo do idioma salvo, como hoje.
+**`InicioScreen` (nova, `lib/screens/inicio/`):** aparece em toda abertura.
+- Mascote e título "Lê Comigo".
+- Três cartões de idioma, no estilo dos botões 3D já existentes, cada um com
+  bandeira e nome no próprio idioma ("Português", "English", "Español"). O
+  idioma atual aparece marcado.
+- Botão grande "Entrar" (traduzido: "Entrar", "Enter", "Entrar").
 
-**Trocar depois:** a `BibliotecaScreen` ganha um botão de idioma na
-barra superior, com a bandeira e o código ("PT", "EN", "ES"). Ele abre
-`EscolhaIdiomaScreen` em modo troca:
-
-1. A pessoa escolhe um idioma.
-2. A tela mostra um indicador de carregamento enquanto o `VoskService`
-   carrega o modelo novo.
-3. O controller salva a escolha.
-4. A tela volta para a biblioteca, que já aparece no idioma novo e com os
-   textos dele.
-
-Escolher o idioma atual só fecha a tela.
-
-**`EscolhaIdiomaScreen`:** três cartões grandes, no estilo dos botões 3D já
-existentes, com bandeira e nome no próprio idioma, além do mascote. No modo
-troca há um botão de voltar.
+Comportamento:
+1. Tocar num cartão chama `IdiomaController.escolher` e a tela inteira muda
+   para aquele idioma na hora. Só a marcação e os textos mudam; o modelo de
+   voz ainda não é trocado.
+2. Tocar em "Entrar" chama `VoskService.carregarModelo(idiomaAtual)`.
+   - Se for o mesmo idioma que a splash carregou, não faz nada e vai direto
+     para a biblioteca.
+   - Se for outro idioma, o botão mostra um indicador de carregamento (a
+     primeira carga de um idioma leva alguns segundos para descompactar),
+     enquanto os cartões e o botão ficam desabilitados. Ao terminar, vai para
+     a biblioteca.
+3. A navegação para a biblioteca usa `pushReplacement`, como a splash faz
+   hoje.
 
 **Falha ao carregar o modelo:**
 - Na splash, aparece o "tentar de novo" que já existe.
-- Na troca, o idioma anterior continua salvo, o app recarrega o modelo
-  anterior e mostra uma mensagem de erro.
+- Na tela inicial, a tela continua aberta com uma mensagem de erro, e
+  "Entrar" pode ser tocado de novo. A pessoa também pode voltar para outro
+  idioma.
 
 ## Textos — `lib/data/`
 
@@ -163,14 +178,18 @@ idioma.
 - `test/idioma_test.dart`: `Idioma.doCodigo` e o `IdiomaController` (salvar e
   ler com `SharedPreferences.setMockInitialValues`).
 - Testes de widget:
-  - Primeira abertura: a splash leva à escolha de idioma, que leva à biblioteca.
-  - A biblioteca mostra os textos do idioma atual.
-  - Trocar o idioma muda os textos e as frases da tela.
+  - A splash leva à tela inicial, com o idioma atual marcado.
+  - Tocar numa bandeira troca as frases da tela inicial na hora.
+  - "Entrar" leva à biblioteca, que mostra os textos do idioma escolhido.
+  - "Entrar" com outro idioma carrega o modelo novo, e a tela trata a falha
+    com mensagem de erro.
+  - 1ª abertura sem nada salvo: usa o idioma do aparelho (pt, en ou es) ou
+    pt.
 - Os testes de widget que já existem passam a envolver as telas com o
   `AppLocalizations` em pt.
 - Os testes no aparelho ficam com o usuário. No fim, entrego um checklist:
-  ler um texto em cada idioma, trocar de idioma, abrir pela primeira vez sem
-  dados salvos e ver o tamanho do APK.
+  ler um texto em cada idioma, trocar de idioma na tela inicial, abrir pela
+  primeira vez sem dados salvos e ver o tamanho do APK.
 
 ## Fora de escopo
 
