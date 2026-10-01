@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/idioma_controller.dart';
 import '../../services/vosk_service.dart';
 import '../../tema/tema_app.dart';
 import 'widgets/carregamento.dart';
@@ -9,7 +10,7 @@ import 'widgets/ilustracao_animada.dart';
 import 'widgets/titulo_animado.dart';
 
 /// Tela de abertura: anima a ilustração enquanto o modelo de voz é
-/// preparado (na primeira vez, o zip de ~31 MB é descompactado).
+/// preparado (na primeira vez de cada idioma, o zip do modelo é descompactado).
 /// Quando termina, troca para [proximaTela].
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.proximaTela});
@@ -78,7 +79,8 @@ class _SplashScreenState extends State<SplashScreen>
     final esperaMinima = Future.delayed(_tempoMinimo);
 
     try {
-      await context.read<VoskService>().carregarModelo();
+      final idioma = context.read<IdiomaController>().atual;
+      await context.read<VoskService>().carregarModelo(idioma);
       await esperaMinima;
       await _progresso.animateTo(
         1,

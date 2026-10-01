@@ -1,22 +1,31 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vosk_flutter/vosk_flutter.dart';
 
+import '../core/idioma.dart';
 import '../core/resultado_vosk.dart';
 
-/// Envolve o vosk_flutter: carrega o modelo uma vez e controla uma sessão
-/// de reconhecimento por vez (o plugin só aceita um SpeechService ativo).
+/// Envolve o vosk_flutter: carrega o modelo de cada idioma uma vez e
+/// controla uma sessão de reconhecimento por vez (o plugin só aceita um
+/// SpeechService ativo).
 ///
 /// O áudio vai direto do microfone para o reconhecedor, em memória.
 /// Nada é gravado em disco.
 class VoskService {
-  static const _assetModelo = 'assets/models/vosk-model-small-pt-0.3.zip';
   static const _taxaAmostragem = 16000;
 
   late final _plugin = VoskFlutterPlugin.instance();
 
-  Model? _modelo;
+  /// Modelos já carregados, por idioma. No Android o plugin guarda o modelo
+  /// do lado Java e não o libera (Model.dispose só age em desktop), então
+  /// cada idioma é criado uma vez só e reaproveitado.
+  final _modelos = <Idioma, Model>{};
+  Idioma? _idioma;
+
+  Model? get _modelo => _modelos[_idioma];
+
   Recognizer? _reconhecedor;
   SpeechService? _servico;
   StreamSubscription<String>? _subParcial;
@@ -28,11 +37,23 @@ class VoskService {
   bool get modeloCarregado => _modelo != null;
   bool get gravando => _servico != null;
 
-  /// Descompacta o modelo dos assets (só na primeira vez, ~31 MB) e o carrega.
-  Future<void> carregarModelo() async {
-    if (_modelo != null) return;
-    final caminho = await ModelLoader().loadFromAssets(_assetModelo);
-    _modelo = await _plugin.createModel(caminho);
+  /// Idioma do modelo ativo; null antes do primeiro carregamento.
+  Idioma? get idiomaCarregado => _idioma;
+
+  /// Torna [idioma] o modelo ativo. Na primeira vez de cada idioma,
+  /// descompacta o zip (alguns segundos). Se falhar, o anterior continua.
+  Future<void> carregarModelo(Idioma idioma) async {
+    if (_idioma == idioma) return;
+    await cancelar();
+    _modelos[idioma] ??= await criarModelo(idioma);
+    _idioma = idioma;
+  }
+
+  /// Descompacta o zip do [idioma] (só na primeira vez) e cria o modelo.
+  @protected
+  Future<Model> criarModelo(Idioma idioma) async {
+    final caminho = await ModelLoader().loadFromAssets(idioma.modelo);
+    return _plugin.createModel(caminho);
   }
 
   /// Pede a permissão do microfone. Retorna true se foi concedida.
