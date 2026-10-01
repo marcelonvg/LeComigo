@@ -1,0 +1,48 @@
+name: le_comigo
+description: "Medidor de fluência leitora offline"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  audioplayers: ^6.8.1
+  fl_chart: ^1.2.0
+  flutter:
+    sdk: flutter
+  pdf: ^3.12.0
+  permission_handler: ^11.4.0
+  printing: ^5.14.3
+  provider: ^6.1.5+1
+  sqflite: ^2.4.4
+  # A versão 0.3.48 do pub.dev exige Dart < 3 e não tem namespace (quebra no AGP 8).
+  # O master do GitHub corrige os dois; fixamos o commit para o build ser reproduzível.
+  vosk_flutter:
+    git:
+      url: https://github.com/alphacep/vosk-flutter.git
+      ref: e655a96f0ce0dadb5ea8900aa1ba23260c3ec904
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  archive: ^3.6.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/models/vosk-model-small-pt-0.3.zip
+    # Arquivos listados um a um: o guia de personagens fica de fora do APK.
+    - assets/images/splash_ilustracao.png
+    - assets/images/personagens/
+    - assets/sons/
+
+  # Fredoka (licença OFL, ver assets/fonts/OFL.txt). Fonte variável: o peso
+  # é escolhido com FontVariation.weight.
+  fonts:
+    - family: Fredoka
+      fonts:
+        - asset: assets/fonts/Fredoka.ttf

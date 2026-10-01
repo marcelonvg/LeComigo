@@ -1,0 +1,8 @@
+Sons de Kenney (www.kenney.nl), licença Creative Commons Zero (CC0):
+http://creativecommons.org/publicdomain/zero/1.0/
+
+toque.ogg     <- Interface Sounds 1.0 / select_001.ogg
+escolha.ogg   <- Interface Sounds 1.0 / pluck_001.ogg
+contagem.ogg  <- Interface Sounds 1.0 / glass_005.ogg
+nao_ouvi.ogg  <- Interface Sounds 1.0 / question_002.ogg
+sucesso.ogg   <- Music Jingles / Pizzicato jingles / jingles_PIZZI10.ogg
