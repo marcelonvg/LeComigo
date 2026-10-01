@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/normalizacao.dart';
 import '../../data/biblioteca.dart';
+import '../../services/idioma_controller.dart';
 import '../../services/sons.dart';
 import '../../tema/tema_app.dart';
 import '../leitura/leitura_screen.dart';
@@ -28,6 +30,7 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final idioma = context.watch<IdiomaController>().atual;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -47,7 +50,7 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
                 aoEscolher: (ano) => setState(() => _ano = ano),
               ),
               const SizedBox(height: 20),
-              for (final texto in textosDoAno(_ano)) ...[
+              for (final texto in textosDoAno(idioma, _ano)) ...[
                 _CartaoBiblioteca(texto: texto, aoTocar: () => _abrir(texto)),
                 const SizedBox(height: 14),
               ],

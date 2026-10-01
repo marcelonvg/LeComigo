@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:le_comigo/core/idioma.dart';
 import 'package:le_comigo/data/biblioteca.dart';
 import 'package:le_comigo/screens/biblioteca/biblioteca_screen.dart';
 import 'package:le_comigo/screens/leitura/leitura_screen.dart';
+import 'package:le_comigo/services/idioma_controller.dart';
 import 'package:le_comigo/services/vosk_service.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Tela de celular: [largura] x [altura] pontos.
 void usarCelular(
@@ -18,9 +21,14 @@ void usarCelular(
 }
 
 Future<void> abrir(WidgetTester tester, {double escalaFonte = 1}) async {
+  SharedPreferences.setMockInitialValues({IdiomaController.chave: 'pt'});
+  final idioma = await IdiomaController.carregar();
   await tester.pumpWidget(
-    Provider<VoskService>(
-      create: (_) => VoskService(),
+    MultiProvider(
+      providers: [
+        Provider<VoskService>(create: (_) => VoskService()),
+        ChangeNotifierProvider<IdiomaController>.value(value: idioma),
+      ],
       child: MaterialApp(
         builder: (context, filho) => MediaQuery(
           data: MediaQuery.of(context)
@@ -34,7 +42,7 @@ Future<void> abrir(WidgetTester tester, {double escalaFonte = 1}) async {
 }
 
 void esperarTitulosDoAno(int ano) {
-  for (final t in textosDoAno(ano)) {
+  for (final t in textosDoAno(Idioma.pt, ano)) {
     expect(find.text(t.titulo), findsOneWidget, reason: t.id);
   }
 }
@@ -44,7 +52,7 @@ void main() {
     usarCelular(tester);
     await abrir(tester);
     esperarTitulosDoAno(1);
-    expect(find.text(textosDoAno(3).first.titulo), findsNothing);
+    expect(find.text(textosDoAno(Idioma.pt, 3).first.titulo), findsNothing);
   });
 
   testWidgets('o chip do 3º ano mostra os textos do 3º', (tester) async {
@@ -53,7 +61,7 @@ void main() {
     await tester.tap(find.text('3º'));
     await tester.pumpAndSettle();
     esperarTitulosDoAno(3);
-    expect(find.text(textosDoAno(1).first.titulo), findsNothing);
+    expect(find.text(textosDoAno(Idioma.pt, 1).first.titulo), findsNothing);
   });
 
   testWidgets('só o ano escolhido fica selecionado', (tester) async {
@@ -85,7 +93,7 @@ void main() {
     await abrir(tester);
     await tester.tap(find.text('2º'));
     await tester.pumpAndSettle();
-    final escolhido = textosDoAno(2)[1];
+    final escolhido = textosDoAno(Idioma.pt, 2)[1];
     await tester.tap(find.text(escolhido.titulo));
     await tester.pumpAndSettle();
     final tela = tester.widget<LeituraScreen>(find.byType(LeituraScreen));
@@ -97,11 +105,26 @@ void main() {
     await abrir(tester);
     await tester.tap(find.text('4º'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(textosDoAno(4).first.titulo));
+    await tester.tap(find.text(textosDoAno(Idioma.pt, 4).first.titulo));
     await tester.pumpAndSettle();
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pumpAndSettle();
     esperarTitulosDoAno(4);
+  });
+
+  testWidgets('mostra os textos do idioma atual', (tester) async {
+    usarCelular(tester);
+    await abrir(tester);
+    final idioma = Provider.of<IdiomaController>(
+      tester.element(find.byType(BibliotecaScreen)),
+      listen: false,
+    );
+    await idioma.escolher(Idioma.es);
+    await tester.pumpAndSettle();
+    for (final t in textosDoAno(Idioma.es, 1)) {
+      expect(find.text(t.titulo), findsOneWidget, reason: t.id);
+    }
+    expect(find.text(textosDoAno(Idioma.pt, 1).first.titulo), findsNothing);
   });
 
   testWidgets('cabe em celular pequeno com fonte aumentada', (tester) async {

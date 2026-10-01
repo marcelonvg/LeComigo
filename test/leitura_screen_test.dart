@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:le_comigo/core/idioma.dart';
 import 'package:le_comigo/core/normalizacao.dart';
 import 'package:le_comigo/core/resultado_vosk.dart';
 import 'package:le_comigo/data/biblioteca.dart';
@@ -25,7 +26,7 @@ Widget _app(TextoBiblioteca texto) => Provider<VoskService>(
 void main() {
   testWidgets('mostra o título do texto recebido', (tester) async {
     usarCelular(tester);
-    final texto = textosDoAno(3)[1];
+    final texto = textosDoAno(Idioma.pt, 3)[1];
     await tester.pumpWidget(_app(texto));
     await tester.tap(find.text('Menino'));
     await tester.pump();
@@ -36,8 +37,10 @@ void main() {
 
   testWidgets('texto mais longo (5º ano) rola sem overflow', (tester) async {
     usarCelular(tester);
-    final texto = textosDoAno(5)
-        .reduce((a, b) => a.conteudo.length >= b.conteudo.length ? a : b);
+    final texto = textosDoAno(
+      Idioma.pt,
+      5,
+    ).reduce((a, b) => a.conteudo.length >= b.conteudo.length ? a : b);
     await tester.pumpWidget(_app(texto));
     await tester.tap(find.text('Menina'));
     await tester.pump();
@@ -49,8 +52,10 @@ void main() {
   });
 
   group('rolagem automática', () {
-    final texto = textosDoAno(5)
-        .reduce((a, b) => a.conteudo.length >= b.conteudo.length ? a : b);
+    final texto = textosDoAno(
+      Idioma.pt,
+      5,
+    ).reduce((a, b) => a.conteudo.length >= b.conteudo.length ? a : b);
     final palavras = tokenizar(texto.conteudo);
 
     late _VoskFalante vosk;
